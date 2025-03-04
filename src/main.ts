@@ -62,7 +62,11 @@ export async function run(): Promise<void> {
     core.debug(`The dist directory is ${distDir}`)
     core.debug(`The changelog file is ${changelogPath}`)
     core.debug(`The changelog dist is ${changelogDist}`)
-    core.debug(`The tags are ${tags}`)
+    
+    // for each tag print it out
+    tags.forEach((tag: any) => {
+      core.debug(`The tag is ${tag.ref}`)
+    })
 
     const cl = new Changelogger(version, changelogPath, changelogDist)
     const notes = await cl.getReleaseNotes()

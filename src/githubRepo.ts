@@ -17,7 +17,7 @@ export class GithubRepo {
     const response = await this.octokit.rest.git.listMatchingRefs({
       owner: this.repoOwner,
       repo: this.repoName,
-      ref: 'tags/v*',
+      ref: 'tags/v',
     });
     return response.data;
   }
