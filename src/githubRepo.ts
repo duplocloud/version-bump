@@ -5,12 +5,14 @@ export class GithubRepo {
   private octokit: any;
   private repoOwner: string;
   private repoName: string;
+  public ref: string;
 
-  constructor(token: string, repoName: string) {
+  constructor(token: string, repoName: string, ref: string) {
     this.octokit = github.getOctokit(token);
     const [owner, name] = repoName.split('/');
     this.repoOwner = owner;
     this.repoName = name;
+    this.ref = ref.replace('refs/', '');
   }
 
   async listTags() {
@@ -27,20 +29,20 @@ export class GithubRepo {
     const baseTree = baseCommit.data.object.sha;
     const tree = await this.createTree(baseTree, file, content);
     const commit = await this.createCommit(baseTree, tree.data.sha, `Bump version to ${tag}`);
-    await this.updateMain(commit.data.sha);
+    await this.updateRef(commit.data.sha);
     await this.createTag(tag, commit.data.sha);
   }
 
-  private async getBaseCommit() {
-    return this.octokit.git.getRef({
+  public async getBaseCommit(): Promise<any> {
+    return this.octokit.rest.git.getRef({
       owner: this.repoOwner,
       repo: this.repoName,
-      ref: 'heads/main',
+      ref: this.ref,
     });
   }
 
   private async createTree(baseTree: string, file: string, content: string) {
-    return this.octokit.git.createTree({
+    return this.octokit.rest.git.createTree({
       owner: this.repoOwner,
       repo: this.repoName,
       base_tree: baseTree,
@@ -54,7 +56,7 @@ export class GithubRepo {
   }
 
   private async createCommit(baseTree: string, treeSha: string, message: string) {
-    return this.octokit.git.createCommit({
+    return this.octokit.rest.git.createCommit({
       owner: this.repoOwner,
       repo: this.repoName,
       message: message,
@@ -63,17 +65,17 @@ export class GithubRepo {
     });
   }
 
-  private async updateMain(commitSha: string) {
-    return this.octokit.git.updateRef({
+  private async updateRef(commitSha: string) {
+    return this.octokit.rest.git.updateRef({
       owner: this.repoOwner,
       repo: this.repoName,
-      ref: 'heads/main',
+      ref: this.ref, // 'heads/main',
       sha: commitSha,
     });
   }
 
   private async createTag(tag: string, commitSha: string) {
-    return this.octokit.git.createRef({
+    return this.octokit.rest.git.createRef({
       owner: this.repoOwner,
       repo: this.repoName,
       ref: `refs/tags/${tag}`,
@@ -81,12 +83,14 @@ export class GithubRepo {
     });
   }
 
-  async generateReleaseNotes(tagName: string, previousTagName?: string, targetCommitish?: string) {
-    const body: any = { tag_name: tagName };
+  async generateReleaseNotes(tagName: string, previousTagName?: string) {
+    const body: any = { 
+      tag_name: tagName,
+      target_commitish: this.ref,
+    };
     if (previousTagName) body.previous_tag_name = previousTagName;
-    if (targetCommitish) body.target_commitish = targetCommitish;
 
-    const response = await this.octokit.repos.generateReleaseNotes({
+    const response = await this.octokit.rest.repos.generateReleaseNotes({
       owner: this.repoOwner,
       repo: this.repoName,
       ...body,

@@ -2,13 +2,14 @@ export declare class GithubRepo {
     private octokit;
     private repoOwner;
     private repoName;
-    constructor(token: string, repoName: string);
+    ref: string;
+    constructor(token: string, repoName: string, ref: string);
     listTags(): Promise<any>;
     publish(tag: string, file: string, content: string): Promise<void>;
-    private getBaseCommit;
+    getBaseCommit(): Promise<any>;
     private createTree;
     private createCommit;
-    private updateMain;
+    private updateRef;
     private createTag;
-    generateReleaseNotes(tagName: string, previousTagName?: string, targetCommitish?: string): Promise<any>;
+    generateReleaseNotes(tagName: string, previousTagName?: string): Promise<any>;
 }

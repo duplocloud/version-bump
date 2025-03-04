@@ -7,6 +7,6 @@ export declare class Changelogger {
     private readChangelog;
     saveChangelog(): Promise<void>;
     newHeader(): string;
-    resetChangelog(version: string): Promise<void>;
+    resetChangelog(): Promise<string>;
     getReleaseNotes(version?: string): Promise<string>;
 }

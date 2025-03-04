@@ -31235,17 +31235,19 @@ class GithubRepo {
     octokit;
     repoOwner;
     repoName;
-    constructor(token, repoName) {
+    ref;
+    constructor(token, repoName, ref) {
         this.octokit = githubExports.getOctokit(token);
         const [owner, name] = repoName.split('/');
         this.repoOwner = owner;
         this.repoName = name;
+        this.ref = ref.replace('refs/', '');
     }
     async listTags() {
         const response = await this.octokit.rest.git.listMatchingRefs({
             owner: this.repoOwner,
             repo: this.repoName,
-            ref: 'tags/v*',
+            ref: 'tags/v',
         });
         return response.data;
     }
@@ -31254,18 +31256,18 @@ class GithubRepo {
         const baseTree = baseCommit.data.object.sha;
         const tree = await this.createTree(baseTree, file, content);
         const commit = await this.createCommit(baseTree, tree.data.sha, `Bump version to ${tag}`);
-        await this.updateMain(commit.data.sha);
+        await this.updateRef(commit.data.sha);
         await this.createTag(tag, commit.data.sha);
     }
     async getBaseCommit() {
-        return this.octokit.git.getRef({
+        return this.octokit.rest.git.getRef({
             owner: this.repoOwner,
             repo: this.repoName,
-            ref: 'heads/main',
+            ref: this.ref,
         });
     }
     async createTree(baseTree, file, content) {
-        return this.octokit.git.createTree({
+        return this.octokit.rest.git.createTree({
             owner: this.repoOwner,
             repo: this.repoName,
             base_tree: baseTree,
@@ -31278,7 +31280,7 @@ class GithubRepo {
         });
     }
     async createCommit(baseTree, treeSha, message) {
-        return this.octokit.git.createCommit({
+        return this.octokit.rest.git.createCommit({
             owner: this.repoOwner,
             repo: this.repoName,
             message: message,
@@ -31286,29 +31288,30 @@ class GithubRepo {
             parents: [baseTree],
         });
     }
-    async updateMain(commitSha) {
-        return this.octokit.git.updateRef({
+    async updateRef(commitSha) {
+        return this.octokit.rest.git.updateRef({
             owner: this.repoOwner,
             repo: this.repoName,
-            ref: 'heads/main',
+            ref: this.ref, // 'heads/main',
             sha: commitSha,
         });
     }
     async createTag(tag, commitSha) {
-        return this.octokit.git.createRef({
+        return this.octokit.rest.git.createRef({
             owner: this.repoOwner,
             repo: this.repoName,
             ref: `refs/tags/${tag}`,
             sha: commitSha,
         });
     }
-    async generateReleaseNotes(tagName, previousTagName, targetCommitish) {
-        const body = { tag_name: tagName };
+    async generateReleaseNotes(tagName, previousTagName) {
+        const body = {
+            tag_name: tagName,
+            target_commitish: this.ref,
+        };
         if (previousTagName)
             body.previous_tag_name = previousTagName;
-        if (targetCommitish)
-            body.target_commitish = targetCommitish;
-        const response = await this.octokit.repos.generateReleaseNotes({
+        const response = await this.octokit.rest.repos.generateReleaseNotes({
             owner: this.repoOwner,
             repo: this.repoName,
             ...body,
@@ -33996,10 +33999,10 @@ class Changelogger {
         const date = new Date().toISOString().split('T')[0];
         return `## [${this.nextVersion}] - ${date}`;
     }
-    async resetChangelog(version) {
+    async resetChangelog() {
         const changelog = await this.readChangelog();
         const newHeader = this.newHeader();
-        this.changelogContent = changelog.replace(/## \[Unreleased\]/, `## [Unreleased]\n\n${newHeader}`);
+        return changelog.replace(/## \[Unreleased\]/, `## [Unreleased]\n\n${newHeader}`);
     }
     async getReleaseNotes(version = "Unreleased") {
         const changelog = await this.readChangelog();
@@ -34034,6 +34037,8 @@ async function run() {
         const wkdirInput = coreExports.getInput('working-directory') || process.cwd();
         const distInput = coreExports.getInput('dist');
         const repoName = coreExports.getInput('repo') || process.env.GITHUB_REPOSITORY;
+        const gitRef = process.env.GITHUB_REF || 'refs/heads/main';
+        const push = coreExports.getInput('push') === 'true';
         let version = coreExports.getInput('version');
         let action = "input";
         const changelogFile = coreExports.getInput('changelog');
@@ -34052,16 +34057,25 @@ async function run() {
         if (!repoName) {
             throw new Error('The repository is not set. Please set the "repo" input or the "GITHUB_REPOSITORY" environment variable.');
         }
+        const repo = new GithubRepo(token, repoName, gitRef);
+        const tags = await repo.listTags();
+        // Find the newest version from the tags
+        const lastVersion = tags.map((tag) => tag.ref.replace('refs/tags/v', '')).reduce((latest, current) => semverExports.gt(current, latest) ? current : latest, '0.0.1');
         // if the version is a release action then we need to do just that
         if (RELEASE_TYPES.includes(version)) {
             action = version;
-            const lastVersion = "0.0.1";
-            const latest = new semverExports.SemVer(lastVersion);
-            const newVer = latest.inc(action);
+            const lastVer = new semverExports.SemVer(lastVersion);
+            const newVer = lastVer.inc(action);
             version = newVer.version;
         }
-        const repo = new GithubRepo(token, repoName);
-        const tags = await repo.listTags();
+        else {
+            // validate the version is an actual semver version
+            if (!semverExports.valid(version)) {
+                throw new Error(`The version "${version}" is not a valid semver version nor is it a valid release action.`);
+            }
+        }
+        const tag = `v${version}`;
+        const lastTag = `v${lastVersion}`;
         coreExports.debug(`The version is ${version}`);
         coreExports.debug(`The action is ${action}`);
         coreExports.debug(`The token is ${token}`);
@@ -34070,9 +34084,15 @@ async function run() {
         coreExports.debug(`The dist directory is ${distDir}`);
         coreExports.debug(`The changelog file is ${changelogPath}`);
         coreExports.debug(`The changelog dist is ${changelogDist}`);
-        coreExports.debug(`The tags are ${tags}`);
+        coreExports.debug(`The latest is ${lastVersion}`);
         const cl = new Changelogger(version, changelogPath, changelogDist);
-        const notes = await cl.getReleaseNotes();
+        const clNotes = await cl.getReleaseNotes();
+        const prNotes = await repo.generateReleaseNotes(tag, lastTag);
+        const notes = clNotes + "\n" + prNotes.body;
+        const newChangelog = await cl.resetChangelog();
+        if (push) {
+            await repo.publish(tag, changelogFile, newChangelog);
+        }
         // Set outputs for other workflow steps to use
         coreExports.setOutput('version', version);
         coreExports.setOutput('tag', `v${version}`);

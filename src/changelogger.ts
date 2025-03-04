@@ -32,10 +32,10 @@ export class Changelogger {
     return `## [${this.nextVersion}] - ${date}`;
   }
 
-  public async resetChangelog(version: string): Promise<void> {
+  public async resetChangelog(): Promise<string> {
     const changelog = await this.readChangelog();
     const newHeader = this.newHeader();
-    this.changelogContent = changelog.replace(/## \[Unreleased\]/, `## [Unreleased]\n\n${newHeader}`);
+    return changelog.replace(/## \[Unreleased\]/, `## [Unreleased]\n\n${newHeader}`);
   }
 
   public async getReleaseNotes(version: string = "Unreleased"): Promise<string> {
