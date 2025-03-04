@@ -46,3 +46,4 @@ Once you have a github application created and the private key downloaded you ca
 - [Building Custom Actions](https://docs.github.com/en/actions/sharing-automations/creating-actions/about-custom-actions)
 - [actions/create-github-app-token](https://github.com/actions/create-github-app-token) - The action that uses app creds to get a token for the github api. This is ideal for the permissions needed for this application. 
 - [Unit Testing Typescript Actions with Jest](https://dev.to/balastrong/write-unit-test-for-your-typescript-github-action-503p)
+- [Vercel NCC](https://www.npmjs.com/package/@vercel/ncc) - For packaging the action.
