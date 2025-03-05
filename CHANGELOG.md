@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.0.6] - 2025-03-05
+
 ### Added
 
 - initialized project with readme, changelog, and action file to get things
