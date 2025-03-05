@@ -1,7 +1,23 @@
 name: Publish Version
 description: Publishes a new version and tag. 
 on: 
-  workflow_dispatch: {}
+  workflow_dispatch: 
+    inputs: 
+      action: 
+        description: Version to bump to
+        default: patch
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+        - premajor
+        - preminor
+        - prepatch
+      push: 
+        description: Push changes to the repository
+        default: false
+        type: boolean
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -14,9 +30,9 @@ jobs:
       id: bump
       uses: duplocloud/version-action@main
       with:
-        version: 'patch'
+        version: ${{ inputs.action }}
         github-token:  ${{ secrets.GITHUB_TOKEN }}
-        push: false
+        push: ${{ inputs.push }}
 
     - name: Summary 
       run: |
