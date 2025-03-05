@@ -1,4 +1,4 @@
-# Release Action
+# Version Bump Action 
 
 The Duplocloud version action for bumping a semantic version. This will bump a
 semantic version tag with a signed commit back to the repository. This will also
@@ -19,9 +19,10 @@ actions, ie this does not use the Git cli at all.
 
 ```yaml
 - name: Bump Version
-  uses: duplocloud/version-action@v1
+  uses: duplocloud/version-bump@v1
   with:
     version: patch
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Inputs
@@ -32,24 +33,41 @@ This is the main input for this action. It can either be a semantic version or
 one of the following: `major`, `minor`, `patch`, `premajor`, `preminor`,
 `prepatch`.
 
+### `changelog`  
+
+The path to the changelog file. If not provided, the action will look for a CHANGELOG.md file in the root of the repository.
+
+### `push`  
+
+If the action should push the changes to the repository. If set to false, only the new version will be outputted without making any real changes.
+
 ## Github Authentication
 
-Once you have a github application created and the private key downloaded you
+You can use the injected `GITHUB_TOKEN` secret to authenticate with the Github. The only downside is you can't allow the `github-actions[bot]` user to override a protected branch.
+
+```yaml
+- name: Bump Version
+  uses: duplocloud/version-bump@v1
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+If you have a Github Application created and the private key downloaded you
 can use the `actions/create-github-app-token` action to get a token for the
 github api. This token will have the permissions needed to make signed commits
-and tags.
+and tags. An application may also be added to a protected branches overrides, eg this can commit the changelog back to main when it's protected. 
 
 ```yaml
 - name: GitHub App Token
   uses: actions/create-github-app-token@v1
   id: app-token
   with:
-    app-id: ${{ inputs.app-id }}
-    private-key: ${{ inputs.private-key }}
+    app-id: ${{ vars.GH_APP_ID }}
+    private-key: ${{ secrets.GH_APP_KEY }}
 - name: Release
-  uses: duplocloud/release-action@main
+  uses: duplocloud/version-bump@main
   with:
-    github-token: ${{ steps.app-token.outputs.token }}
+    token: ${{ steps.app-token.outputs.token }}
 ```
 
 ## References

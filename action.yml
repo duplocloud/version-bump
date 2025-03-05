@@ -1,6 +1,6 @@
-name: Duplocloud Release Action
+name: Duplocloud Version Bump
 description: |
-  Duploclouds own version action to bump a semantic version in a Github repo to make a proper release. This will actually include signed commits by the application.
+  Duploclouds own version action to bump a semantic version in a Github repo to make a proper release. This will sign commits and generate release notes too.
 inputs:
   version:
     description: |
