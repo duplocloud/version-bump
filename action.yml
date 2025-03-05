@@ -1,18 +1,18 @@
 name: Duplocloud Release Action
 description: |
-  Duploclouds own version action to bump a semantic version in a Github repo to make a proper release. This will actually include signed commits by the application. 
-inputs: 
+  Duploclouds own version action to bump a semantic version in a Github repo to make a proper release. This will actually include signed commits by the application.
+inputs:
   version:
-    description: | 
-      Bump the version to the specified semantic version. The following special values are supported: major, minor, patch, premajor, preminor, prepatch. 
+    description: |
+      Bump the version to the specified semantic version. The following special values are supported: major, minor, patch, premajor, preminor, prepatch.
     default: patch
   headline:
     description: |
       The headline of the release. This will be used as the title of the release in Github.
-    required: false 
+    required: false
   notes:
     description: |
-      The notes of the release. This will be added below the changelog and PRs in the release notes. This is good for any static content.  
+      The notes of the release. This will be added below the changelog and PRs in the release notes. This is good for any static content.
     required: false
   changelog:
     description: |
@@ -26,14 +26,14 @@ inputs:
     description: |
       The suffix of the line containing the title of the unreleased section. This section will be changed to the new version and the current date in the format yyyy-mm-dd. The full check for the start of the unreleased section will include the prefix, eg '## [Unreleased]'.
     default: 'Unreleased]'
-  files: 
+  files:
     description: |
-      A list of files or globs to files which should be committed first before bumping the version. This is useful if you want to update the version in multiple files before creating a release. Ultimately the commit the new tag will reference will only have these files as changes. 
+      A list of files or globs to files which should be committed first before bumping the version. This is useful if you want to update the version in multiple files before creating a release. Ultimately the commit the new tag will reference will only have these files as changes.
   push:
     description: |
-      If the action should push the changes to the repository. If set to false, only the new version will be outputted without making any real changes. 
-    default: "true"
-  dist: 
+      If the action should push the changes to the repository. If set to false, only the new version will be outputted without making any real changes.
+    default: 'true'
+  dist:
     description: |
       Path to the folder any generated files should be placed in. The final release notes can be outputed to this directory if needed. By default this is null and any generated file is only in the output of the action.
     default: dist
@@ -44,14 +44,14 @@ inputs:
   working-directory:
     description: |
       The working directory to run the action in. This is useful if the action should be run in a subdirectory of the repository. For example another repo was cloned one directory down and the action should be run in that directory.
-    default: "."
+    default: '.'
   repository:
     description: |
-      The repository to push any changes to. A good use case is a homebrew repo where this repo made the formulae changes and the homebrew repo should be updated with a new release as well. 
+      The repository to push any changes to. A good use case is a homebrew repo where this repo made the formulae changes and the homebrew repo should be updated with a new release as well.
     default: ${{ github.repository }}
 outputs:
   version:
-    description: The new version foir this release. 
+    description: The new version foir this release.
   tag:
     description: The git tag for this release.
   release-notes:
