@@ -6,6 +6,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
     
     - name: Bump Version
       uses: duplocloud/version-action@main
