@@ -34108,6 +34108,8 @@ async function run() {
         // Set outputs for other workflow steps to use
         coreExports.setOutput('version', version);
         coreExports.setOutput('tag', `v${version}`);
+        coreExports.setOutput('previous-version', lastVersion);
+        coreExports.setOutput('previous-tag', lastTag);
         coreExports.setOutput('release-notes', notes);
     }
     catch (error) {
