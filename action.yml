@@ -37,7 +37,7 @@ inputs:
     description: |
       Path to the folder any generated files should be placed in. The final release notes can be outputed to this directory if needed. By default this is null and any generated file is only in the output of the action.
     default: dist
-  github-token:
+  token:
     description: |
       The Github token to use for the action. This is required to make changes to the repository. Ideally this is coming from a Github Application using the actions/create-github-app-token@v1 action.
     required: false

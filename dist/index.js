@@ -34043,7 +34043,7 @@ const RELEASE_TYPES = [
  */
 async function run() {
     try {
-        const token = coreExports.getInput('github-token') || process.env.GITHUB_TOKEN;
+        const token = coreExports.getInput('token') || process.env.GITHUB_TOKEN;
         const wkdirInput = coreExports.getInput('working-directory') || process.cwd();
         const distInput = coreExports.getInput('dist');
         const repoName = coreExports.getInput('repo') || process.env.GITHUB_REPOSITORY;

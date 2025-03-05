@@ -23,7 +23,7 @@ export const RELEASE_TYPES = [
 export async function run(): Promise<void> {
   try {
     const token: string | undefined =
-      core.getInput('github-token') || process.env.GITHUB_TOKEN
+      core.getInput('token') || process.env.GITHUB_TOKEN
     const wkdirInput: string =
       core.getInput('working-directory') || process.cwd()
     const distInput: string = core.getInput('dist')
