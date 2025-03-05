@@ -34016,11 +34016,11 @@ class Changelogger {
             if (!inNotes && line.startsWith(header)) {
                 inNotes = true;
             }
-            else if (inNotes) {
-                notes.push(line);
-            }
             else if (inNotes && line.startsWith('## [')) {
                 break;
+            }
+            else if (inNotes) {
+                notes.push(line);
             }
         }
         return notes.join('\n');
