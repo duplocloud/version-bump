@@ -11,8 +11,19 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Bump Version
+      id: bump
       uses: duplocloud/version-action@main
       with:
         version: 'patch'
         github-token:  ${{ secrets.GITHUB_TOKEN }}
         push: false
+
+    - name: Summary 
+      run: |
+        cat <<EOF > $GITHUB_STEP_SUMMARY
+        New Version: ${{ steps.bump.outputs.version }}
+
+        Release Notes: 
+        --------------
+        ${{ steps.bump.outputs.release-notes }}
+        EOF
