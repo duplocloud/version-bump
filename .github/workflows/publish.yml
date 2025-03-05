@@ -1,5 +1,4 @@
 name: Publish Version
-description: Publishes a new version and tag.
 on:
   workflow_dispatch:
     inputs:
@@ -39,8 +38,8 @@ jobs:
         env:
           ACTION: ${{ inputs.action }}
         run: |
-          TAG=$(npm version $ACTION --no-git-tag-version)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          TAG=$(npm version "$ACTION" --no-git-tag-version)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Bump Version
         id: bump
@@ -59,8 +58,8 @@ jobs:
         run: |
           URL="${URL}?version=v${VERSION}"
           BADGE="[![Release](https://img.shields.io/badge/Github-Actions-blue?style=flat-square&logo=github)](${URL})"
-          echo "url=${URL}" >> $GITHUB_OUTPUT
-          echo "badge=${BADGE}" >> $GITHUB_OUTPUT
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+          echo "badge=${BADGE}" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         id: release
@@ -78,7 +77,7 @@ jobs:
 
       - name: Summary
         run: |
-          cat <<EOF > $GITHUB_STEP_SUMMARY
+          cat <<EOF > "$GITHUB_STEP_SUMMARY"
           New Version: ${{ steps.bump.outputs.version }}
           Previous Version: ${{ steps.bump.outputs.previous-version }}
 
