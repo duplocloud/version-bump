@@ -58,4 +58,4 @@ outputs:
     description: The generated release notes.
 runs:
   using: node20
-  main: 'src/index.js'
+  main: 'dist/index.js'
