@@ -37,6 +37,7 @@ jobs:
       run: |
         cat <<EOF > $GITHUB_STEP_SUMMARY
         New Version: ${{ steps.bump.outputs.version }}
+        Previous Version: ${{ steps.bump.outputs.previous-version }}
 
         Release Notes: 
         --------------

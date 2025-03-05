@@ -110,6 +110,8 @@ export async function run(): Promise<void> {
     // Set outputs for other workflow steps to use
     core.setOutput('version', version)
     core.setOutput('tag', `v${version}`)
+    core.setOutput('previous-version', lastVersion)
+    core.setOutput('previous-tag', lastTag)
     core.setOutput('release-notes', notes)
   } catch (error) {
     // Fail the workflow run if an error occurs
