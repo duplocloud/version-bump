@@ -1,0 +1,15 @@
+name: Publish Version
+description: Publishes a new version and tag. 
+on: 
+  workflow_dispatch: {}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Bump Version
+      uses: duplocloud/version-action@main
+      with:
+        version: 'patch'
+        github-token:  ${{ secrets.GITHUB_TOKEN }}
+        push: false
