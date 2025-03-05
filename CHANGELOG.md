@@ -8,13 +8,9 @@ and this project adheres to
 
 ## [Unreleased]
 
-## [0.0.9] - 2025-03-05
-
-## [0.0.8] - 2025-03-05
-
-## [0.0.7] - 2025-03-05
-
 ### Added
 
 - initialized project with readme, changelog, and action file to get things
   started.
+- publish new version flow
+- add files to the action to be committed along with the version bump

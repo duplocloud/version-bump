@@ -1,4 +1,4 @@
-# Version Bump Action 
+# Version Bump Action
 
 The Duplocloud version action for bumping a semantic version. This will bump a
 semantic version tag with a signed commit back to the repository. This will also
@@ -33,17 +33,21 @@ This is the main input for this action. It can either be a semantic version or
 one of the following: `major`, `minor`, `patch`, `premajor`, `preminor`,
 `prepatch`.
 
-### `changelog`  
+### `changelog`
 
-The path to the changelog file. If not provided, the action will look for a CHANGELOG.md file in the root of the repository.
+The path to the changelog file. If not provided, the action will look for a
+CHANGELOG.md file in the root of the repository.
 
-### `push`  
+### `push`
 
-If the action should push the changes to the repository. If set to false, only the new version will be outputted without making any real changes.
+If the action should push the changes to the repository. If set to false, only
+the new version will be outputted without making any real changes.
 
 ## Github Authentication
 
-You can use the injected `GITHUB_TOKEN` secret to authenticate with the Github. The only downside is you can't allow the `github-actions[bot]` user to override a protected branch.
+You can use the injected `GITHUB_TOKEN` secret to authenticate with the Github.
+The only downside is you can't allow the `github-actions[bot]` user to override
+a protected branch.
 
 ```yaml
 - name: Bump Version
@@ -52,10 +56,11 @@ You can use the injected `GITHUB_TOKEN` secret to authenticate with the Github. 
     token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-If you have a Github Application created and the private key downloaded you
-can use the `actions/create-github-app-token` action to get a token for the
-github api. This token will have the permissions needed to make signed commits
-and tags. An application may also be added to a protected branches overrides, eg this can commit the changelog back to main when it's protected. 
+If you have a Github Application created and the private key downloaded you can
+use the `actions/create-github-app-token` action to get a token for the github
+api. This token will have the permissions needed to make signed commits and
+tags. An application may also be added to a protected branches overrides, eg
+this can commit the changelog back to main when it's protected.
 
 ```yaml
 - name: GitHub App Token

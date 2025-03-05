@@ -4,6 +4,8 @@ import * as semver from 'semver'
 // import * as github from '@actions/github';
 import * as path from 'path'
 import { Changelogger } from './changelogger.js'
+import { globSync } from 'glob'
+import { promises as fs } from 'fs'
 
 export const RELEASE_TYPES = [
   'major',
@@ -82,6 +84,16 @@ export async function run(): Promise<void> {
           `The version "${version}" is not a valid semver version nor is it a valid release action.`
         )
       }
+      // check if the first character is a v and remove it only if it is
+      if (version.charAt(0) === 'v') {
+        version = version.slice(1)
+      }
+      // check if the version is greater than the last version
+      if (!semver.gt(version, lastVersion)) {
+        throw new Error(
+          `The version "${version}" is not greater than the last version "${lastVersion}".`
+        )
+      }
     }
 
     const tag = `v${version}`
@@ -103,8 +115,25 @@ export async function run(): Promise<void> {
     const notes = clNotes + '\n' + prNotes.body
     const newChangelog = await cl.resetChangelog()
 
+    // if the files inout is not '' then split the files by new line. Each file can be a glob pattern that must be resolved to a full path and then added to the files array
+    const filesInput: string = core.getInput('files') || ''
+    const files: string[] = filesInput
+      ? filesInput
+          .split('\n')
+          .flatMap((file) => (file ? globSync(file, { cwd: wkdir }) : []))
+      : []
+    const fileMap: Map<string, string> = new Map()
+    for (const file of files) {
+      const filePath = path.resolve(wkdir, file)
+      const stats = await fs.stat(filePath)
+      if (stats.isFile()) {
+        const fileContents = await fs.readFile(filePath, 'utf8')
+        fileMap.set(file, fileContents)
+      }
+    }
+    fileMap.set(changelogFile, newChangelog)
     if (push) {
-      await repo.publish(tag, changelogFile, newChangelog)
+      await repo.publish(tag, fileMap)
     }
 
     // Set outputs for other workflow steps to use

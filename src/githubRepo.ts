@@ -24,10 +24,16 @@ export class GithubRepo {
     return response.data
   }
 
-  async publish(tag: string, file: string, content: string): Promise<void> {
+  async publish(tag: string, contents: Map<string, string>): Promise<void> {
+    const treeContent = Array.from(contents).map(([file, content]) => ({
+      path: file,
+      mode: '100644',
+      type: 'blob',
+      content: content
+    }))
     const baseCommit = await this.getBaseCommit()
     const baseTree = baseCommit.data.object.sha
-    const tree = await this.createTree(baseTree, file, content)
+    const tree = await this.createTree(baseTree, treeContent)
     const commit = await this.createCommit(
       baseTree,
       tree.data.sha,
@@ -45,19 +51,12 @@ export class GithubRepo {
     })
   }
 
-  private async createTree(baseTree: string, file: string, content: string) {
+  private async createTree(baseTree: string, treeContent: any[]) {
     return this.octokit.rest.git.createTree({
       owner: this.repoOwner,
       repo: this.repoName,
       base_tree: baseTree,
-      tree: [
-        {
-          path: file,
-          mode: '100644',
-          type: 'blob',
-          content: content
-        }
-      ]
+      tree: treeContent
     })
   }
 

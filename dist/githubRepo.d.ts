@@ -5,7 +5,7 @@ export declare class GithubRepo {
     ref: string;
     constructor(token: string, repoName: string, ref: string);
     listTags(): Promise<any>;
-    publish(tag: string, file: string, content: string): Promise<void>;
+    publish(tag: string, contents: Map<string, string>): Promise<void>;
     getBaseCommit(): Promise<any>;
     private createTree;
     private createCommit;
