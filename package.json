@@ -1,6 +1,6 @@
 {
   "name": "version-action",
-  "version": "0.0.1",
+  "version": "0.0.10",
   "type": "module",
   "description": "The version action. This will bump a semantic version tag and commit back to the repository. This will also copy the unreleased section of the changelog and add the new version and date into the changelog effectively resetting the unreleased section to empty. The next part of th release notes will use the Github API to get the generated release notes from the PRs merged since the last release. Finally the release notes will take an optional input of a file path to a markdown file that will be appended to the release notes.",
   "homepage": "https://duplocloud.com",
@@ -40,7 +40,8 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.0"
+    "@actions/github": "^6.0.0",
+    "glob": "^11.0.1"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",

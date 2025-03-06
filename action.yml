@@ -1,6 +1,6 @@
-name: Duplocloud Release Action
+name: Duplocloud Version Bump
 description: |
-  Duploclouds own version action to bump a semantic version in a Github repo to make a proper release. This will actually include signed commits by the application.
+  Duploclouds own version action to bump a semantic version in a Github repo to make a proper release. This will sign commits and generate release notes too.
 inputs:
   version:
     description: |
@@ -18,26 +18,18 @@ inputs:
     description: |
       The path to the changelog file. If not provided, the action will look for a CHANGELOG.md file in the root of the repository.
     default: CHANGELOG.md
-  changelog-section-prefix:
-    description: |
-      The prefix of a line indicating a version section in the changelog. Each version/release will start with this prefix and help the parser to find the correct section. This is also used to determine when the unreleased section starts and ends.
-    default: '## ['
-  changelog-unreleased-suffix:
-    description: |
-      The suffix of the line containing the title of the unreleased section. This section will be changed to the new version and the current date in the format yyyy-mm-dd. The full check for the start of the unreleased section will include the prefix, eg '## [Unreleased]'.
-    default: 'Unreleased]'
   files:
     description: |
       A list of files or globs to files which should be committed first before bumping the version. This is useful if you want to update the version in multiple files before creating a release. Ultimately the commit the new tag will reference will only have these files as changes.
   push:
     description: |
       If the action should push the changes to the repository. If set to false, only the new version will be outputted without making any real changes.
-    default: 'true'
+    default: 'false'
   dist:
     description: |
       Path to the folder any generated files should be placed in. The final release notes can be outputed to this directory if needed. By default this is null and any generated file is only in the output of the action.
     default: dist
-  github-token:
+  token:
     description: |
       The Github token to use for the action. This is required to make changes to the repository. Ideally this is coming from a Github Application using the actions/create-github-app-token@v1 action.
     required: false
@@ -54,8 +46,12 @@ outputs:
     description: The new version foir this release.
   tag:
     description: The git tag for this release.
+  previous-version:
+    description: The previous version of the repository.
+  previous-tag:
+    description: The previous git tag of the repository.
   release-notes:
     description: The generated release notes.
 runs:
   using: node20
-  main: 'src/index.js'
+  main: 'dist/index.js'

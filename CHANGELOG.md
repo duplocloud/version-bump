@@ -12,3 +12,7 @@ and this project adheres to
 
 - initialized project with readme, changelog, and action file to get things
   started.
+- publish new version flow
+- add files to the action to be committed along with the version bump
+- fixed all of the linting, build, and validation issues across all of the
+  linters

@@ -1,0 +1,88 @@
+name: Publish Version
+permissions: {}
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Version to bump to
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - premajor
+          - preminor
+          - prepatch
+      push:
+        description: Push changes to the repository
+        default: false
+        type: boolean
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: NPM Version
+        id: version
+        env:
+          ACTION: ${{ inputs.action }}
+        run: |
+          TAG=$(npm version "$ACTION" --no-git-tag-version)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Bump Version
+        id: bump
+        uses: duplocloud/version-action@main
+        with:
+          version: ${{ steps.version.outputs.tag }}
+          push: ${{ inputs.push }}
+          token: ${{ steps.app-token.outputs.token }}
+          files: package.json
+
+      - name: Registry URL
+        id: registry
+        env:
+          URL: https://github.com/marketplace/actions/duplocloud
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          URL="${URL}?version=v${VERSION}"
+          BADGE="[![Release](https://img.shields.io/badge/Github-Actions-blue?style=flat-square&logo=github)](${URL})"
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+          echo "badge=${BADGE}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        id: release
+        if: inputs.push
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          name: ${{ steps.bump.outputs.tag }}
+          tag_name: ${{ steps.bump.outputs.tag }}
+          prerelease: false
+          body: |
+            [![Publish](${{ github.server_url }}/${{ github.repository }}/actions/workflows/publish.yml/badge.svg)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) ${{ steps.registry.outputs.badge }}
+
+            ${{ steps.bump.outputs.release-notes }}
+
+      - name: Summary
+        run: |
+          cat <<EOF > "$GITHUB_STEP_SUMMARY"
+          New Version: ${{ steps.bump.outputs.version }}
+          Previous Version: ${{ steps.bump.outputs.previous-version }}
+
+          Release Notes: 
+          --------------
+          ${{ steps.bump.outputs.release-notes }}
+          EOF

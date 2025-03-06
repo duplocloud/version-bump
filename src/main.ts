@@ -4,6 +4,8 @@ import * as semver from 'semver'
 // import * as github from '@actions/github';
 import * as path from 'path'
 import { Changelogger } from './changelogger.js'
+import { globSync } from 'glob'
+import { promises as fs } from 'fs'
 
 export const RELEASE_TYPES = [
   'major',
@@ -23,7 +25,7 @@ export const RELEASE_TYPES = [
 export async function run(): Promise<void> {
   try {
     const token: string | undefined =
-      core.getInput('github-token') || process.env.GITHUB_TOKEN
+      core.getInput('token') || process.env.GITHUB_TOKEN
     const wkdirInput: string =
       core.getInput('working-directory') || process.cwd()
     const distInput: string = core.getInput('dist')
@@ -61,8 +63,8 @@ export async function run(): Promise<void> {
     const repo = new GithubRepo(token, repoName, gitRef)
     const tags = await repo.listTags()
     // Find the newest version from the tags
-    const lastVersion = tags
-      .map((tag: any) => tag.ref.replace('refs/tags/v', ''))
+    const lastVersion = tags.data
+      .map((tag: (typeof tags.data)[0]) => tag.ref.replace('refs/tags/v', ''))
       .reduce(
         (latest: string, current: string) =>
           semver.gt(current, latest) ? current : latest,
@@ -80,6 +82,16 @@ export async function run(): Promise<void> {
       if (!semver.valid(version)) {
         throw new Error(
           `The version "${version}" is not a valid semver version nor is it a valid release action.`
+        )
+      }
+      // check if the first character is a v and remove it only if it is
+      if (version.charAt(0) === 'v') {
+        version = version.slice(1)
+      }
+      // check if the version is greater than the last version
+      if (!semver.gt(version, lastVersion)) {
+        throw new Error(
+          `The version "${version}" is not greater than the last version "${lastVersion}".`
         )
       }
     }
@@ -100,16 +112,35 @@ export async function run(): Promise<void> {
     const cl = new Changelogger(version, changelogPath, changelogDist)
     const clNotes = await cl.getReleaseNotes()
     const prNotes = await repo.generateReleaseNotes(tag, lastTag)
-    const notes = clNotes + '\n' + prNotes.body
+    const notes = clNotes + '\n' + prNotes.data.body
     const newChangelog = await cl.resetChangelog()
 
+    // if the files inout is not '' then split the files by new line. Each file can be a glob pattern that must be resolved to a full path and then added to the files array
+    const filesInput: string = core.getInput('files') || ''
+    const files: string[] = filesInput
+      ? filesInput
+          .split('\n')
+          .flatMap((file) => (file ? globSync(file, { cwd: wkdir }) : []))
+      : []
+    const fileMap: Map<string, string> = new Map()
+    for (const file of files) {
+      const filePath = path.resolve(wkdir, file)
+      const stats = await fs.stat(filePath)
+      if (stats.isFile()) {
+        const fileContents = await fs.readFile(filePath, 'utf8')
+        fileMap.set(file, fileContents)
+      }
+    }
+    fileMap.set(changelogFile, newChangelog)
     if (push) {
-      await repo.publish(tag, changelogFile, newChangelog)
+      await repo.publish(tag, fileMap)
     }
 
     // Set outputs for other workflow steps to use
     core.setOutput('version', version)
     core.setOutput('tag', `v${version}`)
+    core.setOutput('previous-version', lastVersion)
+    core.setOutput('previous-tag', lastTag)
     core.setOutput('release-notes', notes)
   } catch (error) {
     // Fail the workflow run if an error occurs

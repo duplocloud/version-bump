@@ -4,12 +4,12 @@ export declare class GithubRepo {
     private repoName;
     ref: string;
     constructor(token: string, repoName: string, ref: string);
-    listTags(): Promise<any>;
-    publish(tag: string, file: string, content: string): Promise<void>;
-    getBaseCommit(): Promise<any>;
+    listTags(): Promise<ReturnType<typeof this.octokit.rest.git.listMatchingRefs>>;
+    publish(tag: string, contents: Map<string, string>): Promise<void>;
+    getBaseCommit(): Promise<ReturnType<typeof this.octokit.rest.git.getRef>>;
     private createTree;
     private createCommit;
     private updateRef;
     private createTag;
-    generateReleaseNotes(tagName: string, previousTagName?: string): Promise<any>;
+    generateReleaseNotes(tag_name: string, previous_tag_name?: string): Promise<ReturnType<typeof this.octokit.rest.repos.generateReleaseNotes>>;
 }
