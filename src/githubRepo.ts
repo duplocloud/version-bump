@@ -1,7 +1,16 @@
 import * as github from '@actions/github'
 
+type Octokit = ReturnType<typeof github.getOctokit>
+type Tree = {
+  path?: string
+  mode?: '100644' | '100755' | '040000' | '160000' | '120000'
+  type?: 'blob' | 'tree' | 'commit'
+  sha?: string | null
+  content?: string
+}[]
+
 export class GithubRepo {
-  private octokit: ReturnType<typeof github.getOctokit>
+  private octokit: Octokit
   private repoOwner: string
   private repoName: string
   public ref: string
@@ -25,7 +34,7 @@ export class GithubRepo {
   }
 
   async publish(tag: string, contents: Map<string, string>): Promise<void> {
-    const treeContent = Array.from(contents).map(([file, content]) => ({
+    const treeContent: Tree = Array.from(contents).map(([file, content]) => ({
       path: file,
       mode: '100644',
       type: 'blob',
@@ -54,14 +63,14 @@ export class GithubRepo {
   }
 
   private async createTree(
-    baseTree: string,
-    treeContent: any[]
+    base_tree: string,
+    tree: Tree
   ): Promise<ReturnType<typeof this.octokit.rest.git.createTree>> {
     return this.octokit.rest.git.createTree({
       owner: this.repoOwner,
       repo: this.repoName,
-      base_tree: baseTree,
-      tree: treeContent
+      base_tree,
+      tree
     })
   }
 

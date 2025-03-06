@@ -31275,12 +31275,12 @@ class GithubRepo {
             ref: this.ref
         });
     }
-    async createTree(baseTree, treeContent) {
+    async createTree(base_tree, tree) {
         return this.octokit.rest.git.createTree({
             owner: this.repoOwner,
             repo: this.repoName,
-            base_tree: baseTree,
-            tree: treeContent
+            base_tree,
+            tree
         });
     }
     async createCommit(baseTree, treeSha, message) {
