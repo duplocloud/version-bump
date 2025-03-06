@@ -79,8 +79,8 @@ this can commit the changelog back to main when it's protected.
 
 - [TypeScript Action Template Repository](https://github.com/actions/typescript-action) -
   Project is using this template.
-- [`@actions/github`](https://www.npmjs.com/package/@actions/github) - Library for
-  using the GitHub API within an action.
+- [`@actions/github`](https://www.npmjs.com/package/@actions/github) - Library
+  for using the GitHub API within an action.
   - [GitHub Repository](https://github.com/actions/toolkit/tree/main/packages/github)
 - [`@actions/core`](https://github.com/actions/toolkit/tree/main/packages/core)
 - [`@actions/toolkit`](https://github.com/actions/toolkit)
