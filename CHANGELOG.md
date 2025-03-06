@@ -14,4 +14,5 @@ and this project adheres to
   started.
 - publish new version flow
 - add files to the action to be committed along with the version bump
-- fixed all of the linting, build, and validation issues across all of the linters
+- fixed all of the linting, build, and validation issues across all of the
+  linters
