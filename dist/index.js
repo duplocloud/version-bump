@@ -31235,7 +31235,6 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-// import * as core from '@actions/core';
 class GithubRepo {
     octokit;
     repoOwner;
@@ -31249,12 +31248,11 @@ class GithubRepo {
         this.ref = ref.replace('refs/', '');
     }
     async listTags() {
-        const response = await this.octokit.rest.git.listMatchingRefs({
+        return this.octokit.rest.git.listMatchingRefs({
             owner: this.repoOwner,
             repo: this.repoName,
             ref: 'tags/v'
         });
-        return response.data;
     }
     async publish(tag, contents) {
         const treeContent = Array.from(contents).map(([file, content]) => ({
@@ -31317,12 +31315,11 @@ class GithubRepo {
         };
         if (previousTagName)
             body.previous_tag_name = previousTagName;
-        const response = await this.octokit.rest.repos.generateReleaseNotes({
+        return this.octokit.rest.repos.generateReleaseNotes({
             owner: this.repoOwner,
             repo: this.repoName,
             ...body
         });
-        return response.data;
     }
 }
 
@@ -33999,7 +33996,9 @@ class Changelogger {
     }
     // using the name of the input file, save the new changelog to the dist folder
     async saveChangelog() {
-        await promises.writeFile(this.distFile, this.changelogContent);
+        if (this.changelogContent) {
+            await promises.writeFile(this.distFile, this.changelogContent);
+        }
     }
     newHeader() {
         const date = new Date().toISOString().split('T')[0];
@@ -34013,8 +34012,8 @@ class Changelogger {
     async getReleaseNotes(version = 'Unreleased') {
         const changelog = await this.readChangelog();
         const header = `## [${version}]`;
+        const notes = [];
         let inNotes = false;
-        let notes = [];
         // iterate each line, when we find the header, start adding lines to the notes, when we find the next section stop iterating
         for (const line of changelog.split('\n')) {
             if (!inNotes && line.startsWith(header)) {
@@ -41966,7 +41965,7 @@ async function run() {
         const repo = new GithubRepo(token, repoName, gitRef);
         const tags = await repo.listTags();
         // Find the newest version from the tags
-        const lastVersion = tags
+        const lastVersion = tags.data
             .map((tag) => tag.ref.replace('refs/tags/v', ''))
             .reduce((latest, current) => semverExports.gt(current, latest) ? current : latest, '0.0.1');
         // if the version is a release action then we need to do just that
@@ -42004,7 +42003,7 @@ async function run() {
         const cl = new Changelogger(version, changelogPath, changelogDist);
         const clNotes = await cl.getReleaseNotes();
         const prNotes = await repo.generateReleaseNotes(tag, lastTag);
-        const notes = clNotes + '\n' + prNotes.body;
+        const notes = clNotes + '\n' + prNotes.data.body;
         const newChangelog = await cl.resetChangelog();
         // if the files inout is not '' then split the files by new line. Each file can be a glob pattern that must be resolved to a full path and then added to the files array
         const filesInput = coreExports.getInput('files') || '';

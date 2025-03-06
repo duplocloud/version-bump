@@ -20,7 +20,9 @@ export class Changelogger {
 
   // using the name of the input file, save the new changelog to the dist folder
   public async saveChangelog(): Promise<void> {
-    await fs.writeFile(this.distFile, this.changelogContent as any)
+    if (this.changelogContent) {
+      await fs.writeFile(this.distFile, this.changelogContent)
+    }
   }
 
   public newHeader(): string {
@@ -42,8 +44,8 @@ export class Changelogger {
   ): Promise<string> {
     const changelog = await this.readChangelog()
     const header = `## [${version}]`
+    const notes: string[] = []
     let inNotes = false
-    let notes: string[] = []
     // iterate each line, when we find the header, start adding lines to the notes, when we find the next section stop iterating
     for (const line of changelog.split('\n')) {
       if (!inNotes && line.startsWith(header)) {

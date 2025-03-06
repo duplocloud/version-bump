@@ -63,7 +63,7 @@ export async function run(): Promise<void> {
     const repo = new GithubRepo(token, repoName, gitRef)
     const tags = await repo.listTags()
     // Find the newest version from the tags
-    const lastVersion = tags
+    const lastVersion = tags.data
       .map((tag: any) => tag.ref.replace('refs/tags/v', ''))
       .reduce(
         (latest: string, current: string) =>
@@ -112,7 +112,7 @@ export async function run(): Promise<void> {
     const cl = new Changelogger(version, changelogPath, changelogDist)
     const clNotes = await cl.getReleaseNotes()
     const prNotes = await repo.generateReleaseNotes(tag, lastTag)
-    const notes = clNotes + '\n' + prNotes.body
+    const notes = clNotes + '\n' + prNotes.data.body
     const newChangelog = await cl.resetChangelog()
 
     // if the files inout is not '' then split the files by new line. Each file can be a glob pattern that must be resolved to a full path and then added to the files array
