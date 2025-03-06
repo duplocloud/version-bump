@@ -59,6 +59,7 @@ jobs:
         with:
           push: false
           version: patch
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print Output
         id: output
