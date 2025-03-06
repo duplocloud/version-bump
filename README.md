@@ -12,8 +12,8 @@ appended to the release notes.
 When using the injected `GITHUB_TOKEN` environment variable, the commits it
 makes are not signed. However, it does sign the tags it makes. So when you want
 the CI/CD job to make changes and make actual signed commits and tags, then this
-action will help. The action uses the GitHub repository API to make all of the Git
-actions, ie this does not use the Git cli at all.
+action will help. The action uses the GitHub repository API to make all of the
+Git actions, ie this does not use the Git cli at all.
 
 ## Usage
 
@@ -57,7 +57,7 @@ a protected branch.
 ```
 
 If you have a GitHub Application created and the private key downloaded you can
-use the `actions/create-github-app-token` action to get a token for the github
+use the `actions/create-github-app-token` action to get a token for the GitHub
 API. This token will have the permissions needed to make signed commits and
 tags. An application may also be added to a protected branches overrides, eg
 this can commit the changelog back to main when it's protected.
@@ -79,11 +79,11 @@ this can commit the changelog back to main when it's protected.
 
 - [TypeScript Action Template Repository](https://github.com/actions/typescript-action) -
   Project is using this template.
-- [@actions/github](https://www.npmjs.com/package/@actions/github) - Library for
+- [`@actions/github`](https://www.npmjs.com/package/@actions/github) - Library for
   using the GitHub API within an action.
   - [GitHub Repository](https://github.com/actions/toolkit/tree/main/packages/github)
-- [@actions/core](https://github.com/actions/toolkit/tree/main/packages/core)
-- [@actions/toolkit](https://github.com/actions/toolkit)
+- [`@actions/core`](https://github.com/actions/toolkit/tree/main/packages/core)
+- [`@actions/toolkit`](https://github.com/actions/toolkit)
 - [Building Custom Actions](https://docs.github.com/en/actions/sharing-automations/creating-actions/about-custom-actions)
 - [actions/create-github-app-token](https://github.com/actions/create-github-app-token) -
   The action that uses app creds to get a token for the GitHub API. This is
