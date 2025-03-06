@@ -11,5 +11,5 @@ export declare class GithubRepo {
     private createCommit;
     private updateRef;
     private createTag;
-    generateReleaseNotes(tagName: string, previousTagName?: string): Promise<ReturnType<typeof this.octokit.rest.repos.generateReleaseNotes>>;
+    generateReleaseNotes(tag_name: string, previous_tag_name?: string): Promise<ReturnType<typeof this.octokit.rest.repos.generateReleaseNotes>>;
 }

@@ -31308,17 +31308,13 @@ class GithubRepo {
             sha: commitSha
         });
     }
-    async generateReleaseNotes(tagName, previousTagName) {
-        const body = {
-            tag_name: tagName,
-            target_commitish: this.ref
-        };
-        if (previousTagName)
-            body.previous_tag_name = previousTagName;
+    async generateReleaseNotes(tag_name, previous_tag_name) {
         return this.octokit.rest.repos.generateReleaseNotes({
             owner: this.repoOwner,
             repo: this.repoName,
-            ...body
+            target_commitish: this.ref,
+            tag_name,
+            previous_tag_name
         });
     }
 }

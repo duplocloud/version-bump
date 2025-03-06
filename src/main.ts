@@ -64,7 +64,7 @@ export async function run(): Promise<void> {
     const tags = await repo.listTags()
     // Find the newest version from the tags
     const lastVersion = tags.data
-      .map((tag: any) => tag.ref.replace('refs/tags/v', ''))
+      .map((tag: (typeof tags.data)[0]) => tag.ref.replace('refs/tags/v', ''))
       .reduce(
         (latest: string, current: string) =>
           semver.gt(current, latest) ? current : latest,

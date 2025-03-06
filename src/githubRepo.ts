@@ -112,19 +112,15 @@ export class GithubRepo {
   }
 
   public async generateReleaseNotes(
-    tagName: string,
-    previousTagName?: string
+    tag_name: string,
+    previous_tag_name?: string
   ): Promise<ReturnType<typeof this.octokit.rest.repos.generateReleaseNotes>> {
-    const body: any = {
-      tag_name: tagName,
-      target_commitish: this.ref
-    }
-    if (previousTagName) body.previous_tag_name = previousTagName
-
     return this.octokit.rest.repos.generateReleaseNotes({
       owner: this.repoOwner,
       repo: this.repoName,
-      ...body
+      target_commitish: this.ref,
+      tag_name,
+      previous_tag_name
     })
   }
 }
