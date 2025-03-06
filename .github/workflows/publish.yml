@@ -1,4 +1,5 @@
 name: Publish Version
+permissions: {}
 on:
   workflow_dispatch:
     inputs:
