@@ -41,7 +41,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
-    "glob": "^11.0.1"
+    "glob": "^11.0.2"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",
