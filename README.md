@@ -33,6 +33,10 @@ This is the main input for this action. It can either be a semantic version or
 one of the following: `major`, `minor`, `patch`, `premajor`, `preminor`,
 `prepatch`.
 
+A repository with no `v*` tags yet bumps from `0.0.0`, so its first `patch` is
+`0.0.1`. The release notes then cover the whole history, the `previous-version`
+output is `0.0.0` and the `previous-tag` output is empty.
+
 ### `changelog`
 
 The path to the changelog file. If not provided, the action will look for a

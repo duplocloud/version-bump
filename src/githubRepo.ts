@@ -120,7 +120,8 @@ export class GithubRepo {
       repo: this.repoName,
       target_commitish: this.ref,
       tag_name,
-      previous_tag_name
+      // with no previous tag GitHub generates notes from the whole history
+      ...(previous_tag_name ? { previous_tag_name } : {})
     })
   }
 }

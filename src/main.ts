@@ -2,10 +2,10 @@ import * as core from '@actions/core'
 import { GithubRepo } from './githubRepo.js'
 import * as semver from 'semver'
 // import * as github from '@actions/github';
-import * as path from 'path'
+import * as path from 'node:path'
 import { Changelogger } from './changelogger.js'
 import { globSync } from 'glob'
-import { promises as fs } from 'fs'
+import { promises as fs } from 'node:fs'
 
 export const RELEASE_TYPES = [
   'major',
@@ -62,14 +62,17 @@ export async function run(): Promise<void> {
 
     const repo = new GithubRepo(token, repoName, gitRef)
     const tags = await repo.listTags()
-    // Find the newest version from the tags
-    const lastVersion = tags.data
-      .map((tag: (typeof tags.data)[0]) => tag.ref.replace('refs/tags/v', ''))
-      .reduce(
-        (latest: string, current: string) =>
-          semver.gt(current, latest) ? current : latest,
-        '0.0.1'
-      )
+    const versions = tags.data.map((tag: (typeof tags.data)[0]) =>
+      tag.ref.replace('refs/tags/v', '')
+    )
+    // With no version tags this is the first release: bump from 0.0.0 and
+    // there is no previous tag to generate release notes from.
+    const hasPrevious = versions.length > 0
+    const lastVersion = hasPrevious
+      ? versions.reduce((latest: string, current: string) =>
+          semver.gt(current, latest) ? current : latest
+        )
+      : '0.0.0'
 
     // if the version is a release action then we need to do just that
     if (RELEASE_TYPES.includes(version as semver.ReleaseType)) {
@@ -97,7 +100,7 @@ export async function run(): Promise<void> {
     }
 
     const tag = `v${version}`
-    const lastTag = `v${lastVersion}`
+    const lastTag = hasPrevious ? `v${lastVersion}` : ''
 
     core.debug(`The version is ${version}`)
     core.debug(`The action is ${action}`)
@@ -112,7 +115,7 @@ export async function run(): Promise<void> {
     const cl = new Changelogger(version, changelogPath, changelogDist)
     const clNotes = await cl.getReleaseNotes()
     const prNotes = await repo.generateReleaseNotes(tag, lastTag)
-    const notes = clNotes + '\n' + prNotes.data.body
+    const notes = `${clNotes}\n${prNotes.data.body}`
     const newChangelog = await cl.resetChangelog()
 
     // if the files inout is not '' then split the files by new line. Each file can be a glob pattern that must be resolved to a full path and then added to the files array
