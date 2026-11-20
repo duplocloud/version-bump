@@ -47,9 +47,11 @@ outputs:
   tag:
     description: The git tag for this release.
   previous-version:
-    description: The previous version of the repository.
+    description: |
+      The previous version of the repository, or 0.0.0 when it has no version tags yet.
   previous-tag:
-    description: The previous git tag of the repository.
+    description: |
+      The previous git tag of the repository, or empty when it has no version tags yet.
   release-notes:
     description: The generated release notes.
 runs:

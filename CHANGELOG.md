@@ -16,3 +16,8 @@ and this project adheres to
 - add files to the action to be committed along with the version bump
 - fixed all of the linting, build, and validation issues across all of the
   linters
+
+### Fixed
+
+- a repository with no version tags bumps from 0.0.0 and its release notes skip
+  the previous tag

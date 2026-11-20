@@ -31314,7 +31314,8 @@ class GithubRepo {
             repo: this.repoName,
             target_commitish: this.ref,
             tag_name,
-            previous_tag_name
+            // with no previous tag GitHub generates notes from the whole history
+            ...(previous_tag_name ? { previous_tag_name } : {})
         });
     }
 }
@@ -41960,10 +41961,13 @@ async function run() {
         }
         const repo = new GithubRepo(token, repoName, gitRef);
         const tags = await repo.listTags();
-        // Find the newest version from the tags
-        const lastVersion = tags.data
-            .map((tag) => tag.ref.replace('refs/tags/v', ''))
-            .reduce((latest, current) => semverExports.gt(current, latest) ? current : latest, '0.0.1');
+        const versions = tags.data.map((tag) => tag.ref.replace('refs/tags/v', ''));
+        // With no version tags this is the first release: bump from 0.0.0 and
+        // there is no previous tag to generate release notes from.
+        const hasPrevious = versions.length > 0;
+        const lastVersion = hasPrevious
+            ? versions.reduce((latest, current) => semverExports.gt(current, latest) ? current : latest)
+            : '0.0.0';
         // if the version is a release action then we need to do just that
         if (RELEASE_TYPES.includes(version)) {
             action = version;
@@ -41986,7 +41990,7 @@ async function run() {
             }
         }
         const tag = `v${version}`;
-        const lastTag = `v${lastVersion}`;
+        const lastTag = hasPrevious ? `v${lastVersion}` : '';
         coreExports.debug(`The version is ${version}`);
         coreExports.debug(`The action is ${action}`);
         coreExports.debug(`The token is ${token}`);
