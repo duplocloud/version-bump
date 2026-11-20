@@ -6,9 +6,9 @@
  * so that the actual '@actions/core' module is not imported.
  */
 import { jest } from '@jest/globals'
-import { mkdtempSync, rmSync, writeFileSync } from 'fs'
-import { tmpdir } from 'os'
-import * as path from 'path'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import * as path from 'node:path'
 import * as core from '../__fixtures__/core.js'
 import * as github from '../__fixtures__/github.js'
 
